@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ofMain.h"
-
+#include "GLFW/glfw3.h"
 // Loading Thread use OpenGL share context 
 // eg. 
 //		ofxLoadingThread loader;
@@ -25,12 +25,10 @@ public:
 
 private:
 
-	// auto func;
+	//auto func;
 	std::function<void()> func;
 
-	HDC		m_hdc;				// current win device
-	HGLRC	m_current_rc;		// current opengl context
-	HGLRC	m_loading_rc;		// created opengl context
+	GLFWwindow* shared_context;
 
 	bool	bLoaded;
 

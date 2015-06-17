@@ -1,7 +1,8 @@
 #include "ofxLoadingThread.h"
 
-
-ofxLoadingThread::ofxLoadingThread() : bLoaded(false)
+ofxLoadingThread::ofxLoadingThread() 
+	: bLoaded(false),
+	shared_context(NULL)
 {
 	
 }
@@ -9,23 +10,16 @@ ofxLoadingThread::ofxLoadingThread() : bLoaded(false)
 
 ofxLoadingThread::~ofxLoadingThread()
 {
+	stopThread();
+	if (shared_context) glfwDestroyWindow(shared_context);
 }
 
 void ofxLoadingThread::initContext()
 {
-	// get current device
-	m_hdc = wglGetCurrentDC();
-
-	// get current opengl context
-	m_current_rc = wglGetCurrentContext();
-	// create a opengl context from current device
-	m_loading_rc = wglCreateContext(m_hdc);
-
-	// share current opengl context to loading context
-	wglShareLists(m_loading_rc, m_current_rc);
-	//wglShareLists(g_current_rc, g_loading_rc);
-
-	wglMakeCurrent(m_hdc, m_current_rc);
+	GLFWwindow* current_context = glfwGetCurrentContext();
+	shared_context = glfwCreateWindow(1, 1, "loading thread", NULL, current_context);
+	//glfwShowWindow(shared_context);
+	glfwMakeContextCurrent(current_context);
 }
 
 void ofxLoadingThread::start()
@@ -36,8 +30,12 @@ void ofxLoadingThread::start()
 
 void ofxLoadingThread::threadedFunction()
 {
-	// set current thread opengl context
-	wglMakeCurrent(m_hdc, m_loading_rc);
+// 	if (!bInited)
+// 	{
+// 		initContext();
+// 	}
+	// set shared context
+	glfwMakeContextCurrent(shared_context);
 
 	// call load func
 	if ( func != nullptr ) func();
